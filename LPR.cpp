@@ -60,36 +60,79 @@ Mat Step(Mat grey, uint th1, uint th2)
     return stepped;
 }
 
-Mat Avg(Mat grey, uint neighbor_size)
+Mat Edge(Mat grey, int neighbors, uint th)
 {
-    Mat average = Mat::zeros(grey.size(), CV_8UC1);
-    for (int i = 1; i < grey.rows - 1; i++)
-    {
-        for (int j = 1; j < grey.cols - 1; j++)
-        {
-            average.at<uchar>(i, j);
 
-        }
-    }
-    return average;
 }
 
 
-Mat AVG(Mat grey, uint neighbour)
+Mat AVG(Mat grey, uint neighbors)
 {
-    
+    Mat avg = Mat::zeros(grey.size(), CV_8UC1);
+    int tot = pow(2 * neighbors, 2);
 
-	Mat blur = Mat::zeros(grey.size(), CV_8UC1);
-
-    //find neighbors
-    for (int i = 0; i < grey.rows; i++)
+    for (int i = neighbors; i < grey.rows - neighbors; i++)
     {
-        for (int j = 0; j < grey.cols; j++)
+        for (int j = neighbors; j < grey.cols - neighbors; j++)
         {
-
+            int sum = 0;
+            for (int ii = -neighbors; ii < neighbors; ii++)
+            {
+                for (int jj = -neighbors; jj < neighbors; jj++)
+                {
+                	sum += (grey.at<uchar>(i + ii, j+ jj));
+                }
+            }
+            avg.at<uchar>(i, j) = sum / tot;
         }
     }
-    return blur;
+    return avg;
+}
+
+Mat Max(Mat grey, uint neighbors)
+{
+    Mat max = Mat::zeros(grey.size(), CV_8UC1);
+
+    for (int i = neighbors; i < grey.rows - neighbors; i++)
+    {
+        for (int j = neighbors; j < grey.cols - neighbors; j++)
+        {
+            int def = -1;
+            for (int ii = -neighbors; ii < neighbors; ii++)
+            {
+                for (int jj = -neighbors; jj < neighbors; jj++)
+                {
+                    if ((grey.at<uchar>(i + ii, j + jj)) > def)
+                        def = grey.at<uchar>(i + ii, j + jj);
+                }
+            }
+            max.at<uchar>(i, j) = def;
+        }
+    }
+    return max;
+}
+
+Mat Min(Mat grey, uint neighbors)
+{
+    Mat min = Mat::zeros(grey.size(), CV_8UC1);
+
+    for (int i = neighbors; i < grey.rows - neighbors; i++)
+    {
+        for (int j = neighbors; j < grey.cols - neighbors; j++)
+        {
+            int def = 255;
+            for (int ii = -neighbors; ii < neighbors; ii++)
+            {
+                for (int jj = -neighbors; jj < neighbors; jj++)
+                {
+                    if ((grey.at<uchar>(i + ii, j + jj)) < def)
+                        def = grey.at<uchar>(i + ii, j + jj);
+                }
+            }
+            min.at<uchar>(i, j) = def;
+        }
+    }
+    return min;
 }
 
 int main()
@@ -97,19 +140,20 @@ int main()
     Mat img;
     img = imread("C:\\Projects\\LPR\\res\\images\\car1.png");
     imshow("RGB image", img);
-
+    
     Mat grey_img = RGBToGrey(img);
     imshow("Grey image", grey_img);
-
+    
     Mat bin_img = GreyToBinary(grey_img, 128);
     imshow("Binary image", bin_img);
-
+    
     Mat inverted_img = Inversion(grey_img);
     imshow("Inverted image", inverted_img);
-
+    
     Mat stepped_img = Step(grey_img, 80, 140);
     imshow("Stepped image", stepped_img);
 
+    Mat 
 
     waitKey();
     return 0;
